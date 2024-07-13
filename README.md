@@ -1,104 +1,94 @@
 # TimesFM
 
-TimesFM  (Time Series Foundation Model) is a pretrained time-series foundation model developed by Google
-Research for time-series forecasting.
+TimesFM（时间序列基础模型）是Google Research为时间序列预测开发的预训练时间序列基础模式。
 
-* Paper: [A decoder-only foundation model for time-series forecasting](https://arxiv.org/abs/2310.10688), to appear in ICML 2024.
-* [Google Research blog](https://research.google/blog/a-decoder-only-foundation-model-for-time-series-forecasting/)
-* [Hugging Face checkpoint repo](https://huggingface.co/google/timesfm-1.0-200m)
+* 论文: [时间序列预测的纯解码器基础模型](https://arxiv.org/abs/2310.10688), 将出现在ICML 2024.
+* [谷歌研究博客](https://research.google/blog/a-decoder-only-foundation-model-for-time-series-forecasting/)
+* [Hugging Face 检查点仓库](https://huggingface.co/google/timesfm-1.0-200m)
 
-This repo contains the code to load public TimesFM checkpoints and run model
-inference. Please visit our 
+此仓库包含加载公共TimesFM检查点和运行模型的代码
+推论请访问我们的下载模型检查点。
 [Hugging Face checkpoint repo](https://huggingface.co/google/timesfm-1.0-200m)
-to download model checkpoints.
-
-This is not an officially supported Google product.
-
-We recommend at least 16GB RAM to load TimesFM dependencies.
+这不是Google官方支持的产品。
+我们建议至少16GB RAM来加载TimesFM依赖项。
 
 ## Checkpoint timesfm-1.0-200m
 
-timesfm-1.0-200m is the first open model checkpoint:
+timesfm-1.0-200m 是第一个开放模型检查点:
 
-- It performs univariate time series forecasting for context lengths up to 512 timepoints and any horizon lengths, with an optional frequency indicator.
-- It focuses on point forecasts, and does not support probabilistic forecasts. We experimentally offer quantile heads but they have not been calibrated after pretraining.
-- It requires the context to be contiguous (i.e. no "holes"), and the context and the horizon to be of the same frequency.
+- 它对多达512个时间点的上下文长度和任何范围长度进行单变量时间序列预测，并带有可选的示频器。
+- 它侧重于点预测，不支持概率预测。我们实验性地提供了分位数头，但它们在预训练后尚未校准。
+- 它要求上下文是连续的（即没有“洞”），上下文和范围的频率相同。
 
 ## Benchmarks
 
-Please refer to our result tables on the [extended benchmarks](https://github.com/google-research/timesfm/tree/master/experiments/extended_benchmarks) and the [long horizon benchmarks](https://github.com/google-research/timesfm/tree/master/experiments/long_horizon_benchmarks).
+请参阅我们的结果表 [扩展基准测试](https://github.com/google-research/timesfm/tree/master/experiments/extended_benchmarks) and the [long horizon benchmarks](https://github.com/google-research/timesfm/tree/master/experiments/long_horizon_benchmarks).
 
-Please look into the README files in the respective benchmark directories within `experiments/` for instructions for running TimesFM on the respective benchmarks.
+请查看“experiments/”中相应基准目录中的README文件，了解在相应基准上运行TimesFM的说明。
 
-## Installation
+## 安装说明
 
-### Installation as a package
+### 打包安装
 
-To install the TimesFM as a package, you can run the following command without cloning this repo:
+要将TimesFM作为软件包安装，您可以在不克隆此仓库的情况下运行以下命令：
 
 `pip install timesfm`
 
-### Installation using conda
+### 使用conda安装
 
-For calling TimesFM, We have two environment files. Inside `timesfm`, for
-GPU installation (assuming CUDA 12 has been setup), you can create a conda
-environment `tfm_env` from the base folder through:
+为了调用TimesFM，我们有两个环境文件。在“timesfm”内部，for GPU安装（假设CUDA 12已安装），您可以创建conda
+通过以下方式从基本文件夹中删除环境“tfm_env”：
 
 ```
 conda env create --file=environment.yml
 ```
 
-For a CPU setup please use,
+对于CPU设置，请使用，
 
 ```
 conda env create --file=environment_cpu.yml
 ```
-to create the environment instead.
-
-Follow by
-
+创造一个开发环境，然后执行
 ```
 conda activate tfm_env
 pip install -e .
 ```
-to install the package.
+以安装该软件包。
 
-**Note**: 
+**注意**: 
 
-1. Running the provided benchmarks would require additional dependencies.
-Please use the environment files under `experiments` instead.
+1. 运行提供的基准测试需要额外的依赖关系。
+请使用`experiments`下的环境文件。 
 
-2. The dependency `lingvo` does not support ARM architectures, and the code is not working for machines with Apple silicon. We are aware of this issue and are working on a solution. Stay tuned.
+2. 依赖项“lingvo”不支持ARM架构，并且该代码不适用于使用苹果芯片的机器。我们意识到这个问题，并正在努力寻求解决方案。敬请期待。
 
+### poetry的本地安装方法
 
-### Local installation using poetry
-
-To from the current repository/local version (like you would have previously done with `pip -e .`), you can run the command
+从当前存储库/本地版本（就像您之前使用`pip-e.`一样），您可以运行以下命令
 
 ```
 pip install poetry # optional
 poetry install
 ```
 
-This will install the environment in the local .venv folder (depends on the configuration) and matches the python command to the poetry environment. If this is not the case, you can use `poetry run python` to use the local environment.
+这将在本地安装环境.venv 文件夹 (取决于实际配置) 并于poetry环境的python命令相匹配. 如果不这样的话，您可以使用“poetry run python”来使用本地环境。
 
-### Notes
+### 注意
 
-1. Running the provided benchmarks would require additional dependencies.
-Please use the environment files under `experiments` instead.
+1. 运行提供的基准测试需要额外的依赖关系。请使用`experiments` 下的环境文件。
 
-2. The dependency `lingvo` does not support ARM architectures, and the code is not working for machines with Apple silicon. We are aware of this issue and are working on a solution. Stay tuned.
+2. 依赖项“lingvo”不支持ARM架构，并且该代码不适用于使用苹果芯片的机器。我们意识到这个问题，并正在努力寻求解决方案。敬请期待。
 
-#### Building the package and publishing to PyPI
+#### 构建包并发布到PyPI
 
-The package can be built using the command `poetry build`.
+可以使用命令“poetry build”构建该包。
 
-To build and publish it to PyPI, the command `poetry publish` can be used. This command will require the user to have the necessary permissions to publish to the PyPI repository.
+要构建并发布到PyPI，可以使用命令“poetry publish”。此命令将要求用户具有发布到PyPI存储库所需的权限。
 
-## Usage 
+## 用法
 
-### Initialize the model and load a checkpoint.
-Then the base class can be loaded as,
+### 构建初始化模型并加载检查点。
+然后，基类可以被加载为，
 
 ```python
 import timesfm
@@ -114,9 +104,7 @@ tfm = timesfm.TimesFm(
 )
 tfm.load_from_checkpoint(repo_id="google/timesfm-1.0-200m")
 ```
-
-Note that the four parameters are fixed to load the 200m model
-
+请注意，这四个参数是固定的，用于加载200m的模型
 ```python
 input_patch_len=32,
 output_patch_len=128,
