@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# 导入所需的Python模块
 import os
 from time import time
 from typing import List, Optional, Tuple
@@ -29,11 +30,11 @@ from utilsforecast.processing import (
     vertical_concat,
 )
 
-
+# 计算给定频率字符串的季节性周期
 def get_seasonality(freq: str) -> int:
   return _get_seasonality(freq, seasonalities={"D": 7})
 
-
+# 将列转换为日期时间类型，如果它还不是
 def maybe_convert_col_to_datetime(
     df: pd.DataFrame, col_name: str
 ) -> pd.DataFrame:
@@ -42,7 +43,7 @@ def maybe_convert_col_to_datetime(
     df[col_name] = pd.to_datetime(df[col_name])
   return df
 
-
+# 如果时间序列长度小于最小长度，则在前面填充零
 def zero_pad_time_series(df, freq, min_length=36):
   """If time_series length is less than min_length, front pad it with zeros."""
   # 1. Calculate required padding for each unique_id
@@ -80,7 +81,7 @@ def zero_pad_time_series(df, freq, min_length=36):
   result_df = pd.concat(padded_data + [df[~df["unique_id"].isin(to_pad)]])
   return result_df
 
-
+# 定义一个抽象基类，用于时间序列预测
 class Forecaster:
   """Borrowed from
 
@@ -148,7 +149,7 @@ class Forecaster:
     fcst_cv_df = out[first_out_cols + remaining_cols]
     return fcst_cv_df
 
-
+# TimeGPT类继承自Forecaster，实现了具体的预测逻辑
 class TimeGPT(Forecaster):
   """Borrowed from
 
@@ -221,7 +222,7 @@ class TimeGPT(Forecaster):
     fcst_df = fcst_df.rename(columns=replace_dict)
     return fcst_df
 
-
+# 运行TimeGPT模型进行预测的高级函数
 def run_timegpt(
     train_df: pd.DataFrame,
     horizon: int,
@@ -231,15 +232,20 @@ def run_timegpt(
     dataset: str,
     model: str = "timegpt-1",
 ) -> Tuple[pd.DataFrame, float, str]:
+  # 设置环境变量，指示Nixtla API使用列来识别ID
   os.environ["NIXTLA_ID_AS_COL"] = "true"
+  # 创建TimeGPT模型实例
   model = TimeGPT(model="timegpt-1", alias=model)
+  # 对训练数据进行填充以满足最小长度要求
   padded_train_df = zero_pad_time_series(train_df, freq)
+  # 记录开始时间，用于计算预测过程的总时间
   init_time = time()
-  # For these datasets the API fails if we do not chunk.
+  # #根据数据集类型决定是否需要分块处理以避免API调用失败
   if dataset in ["m5", "m4_quarterly"]:
     chunk_size = 5000
   else:
     chunk_size = None
+  # 进行预测，如果设置了chunk_size，则按块进行预测
   fcsts_df = model.forecast(
       df=padded_train_df,
       h=horizon,
@@ -247,13 +253,13 @@ def run_timegpt(
       freq=freq,
       chunk_size=chunk_size,
   )
+  # 计算并记录预测过程的总时间
   total_time = time() - init_time
-  # In case levels are not returned we replace the levels with the mean predictions.
-  # Note that this does not affect the results table as we only compare on point
-  # forecastign metrics.
+  # 如果预测结果中没有置信水平的列，则用平均预测值填充
   for lvl in level:
     if f"{model.alias}-lo-{lvl}" not in fcsts_df.columns:
       fcsts_df[f"{model.alias}-lo-{lvl}"] = fcsts_df[model.alias]
     if f"{model.alias}-hi-{lvl}" not in fcsts_df.columns:
       fcsts_df[f"{model.alias}-hi-{lvl}"] = fcsts_df[model.alias]
+    # 返回预测结果、总时间和模型别名
   return fcsts_df, total_time, model.alias
