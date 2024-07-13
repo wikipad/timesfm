@@ -112,34 +112,33 @@ num_layers=20,
 model_dims=1280,
 ```
 
-1. The `context_len` here can be set as the max context length **of the model**. **It needs to be a multiplier of `input_patch_len`, i.e. a multiplier of 32.** You can provide a shorter series to the `tfm.forecast()` function and the model will handle it. Currently, the model handles a max context length of 512, which can be increased in later releases. The input time series can have **any context length**. Padding / truncation will be handled by the inference code if needed.
+1. 这里的`context_len`可以设置为模型**的最大上下文长度**。**它需要是“input_patch_len”的倍数，即32的倍数。**您可以向“tfm.predictor（）”函数提供一个较短的序列，模型将处理它。目前，模型处理的最大上下文长度为512，在以后的版本中会增大。输入时间序列可以具有**任何上下文长度**。如果需要，填充/截断将由推理代码处理。
 
-2. The horizon length can be set to anything. We recommend setting it to the largest horizon length you would need in the forecasting tasks for your application. We generally recommend horizon length <= context length but it is not a requirement in the function call.
+2. 范围长度可以设置为任何值。我们建议将其设置为应用程序预测任务中所需的最大水平长度。我们通常建议范围长度<=上下文长度，但这不是函数调用中的要求。
 
-3. `backend` is one of "cpu", "gpu" or "tpu", case sensitive.
+3. `backend`是“cpu”、“gpu”或“tpu”之一，注意区分大小写。
 
-### Perform inference
+### 执行推理
 
-We provide APIs to forecast from either array inputs or `pandas` dataframe. Both forecast methods expect (1) the input time series contexts, (2) along with their frequencies. Please look at the documentation of the functions `tfm.forecast()` and `tfm.forecast_on_df()` for detailed instructions.
+我们提供API，从数组输入或“pandas”数据帧进行预测。这两种预测方法都期望（1）输入时间序列上下文，（2）以及它们的频率。请查看函数“tfm.predictor（）”和“tfm.forecast_on_df（）”的文档以获取详细说明。
 
-In particular regarding the frequency, TimesFM expects a categorical indicator valued in {0, 1, 2}:
+特别是关于频率，TimesFM期望一个值为｛0，1，2｝的分类指标：
 
-- **0** (default): high frequency, long horizon time series. We recommend using this for time series up to daily granularity.
-- **1**: medium frequency time series. We recommend using this for weekly and monthly data.
-- **2**: low frequency, short horizon time series. We recommend using this for anything beyond monthly, e.g. quarterly or yearly.
+- **0** （默认）：高频、长时间序列。我们建议将其用于高达每日粒度的时间序列。
+- **1**: 中频时间序列。我们建议将其用于每周和每月的数据。
+- **2**: 低频、短时间序列。我们建议将其用于每月以外的任何事情，例如每季度或每年。
 
-This categorical value should be directly provided with the array inputs. For dataframe inputs, we convert the conventional letter coding of frequencies to our expected categories, that
+这个分类值应该直接与数组输入一起提供。对于数据帧输入，我们将频率的传统字母编码转换为预期的类别，即
 
 - **0**: T, MIN, H, D, B, U
 - **1**: W, M
 - **2**: Q, Y
 
-Notice you do **NOT** have to strictly follow our recommendation here. Although this is our setup during model training and we expect it to offer the best forecast result, you can also view the frequency input as a free parameter and modify it per your specific use case.
+请注意，您**不**必须严格遵守我们的建议。虽然这是我们在模型训练期间的设置，我们希望它能提供最佳的预测结果，但您也可以将频率输入视为自由参数，并根据您的特定用例进行修改。
 
 
-Examples:
-
-Array inputs, with the frequencies set to low, medium and high respectively.
+示例：
+阵列输入，频率分别设置为低、中、高。
 
 ```python
 import numpy as np
@@ -156,7 +155,7 @@ point_forecast, experimental_quantile_forecast = tfm.forecast(
 )
 ```
 
-`pandas` dataframe, with the frequency set to "M" monthly.
+`pandas`的数据帧，频率设置为每月“M”。
 
 ```python
 import pandas as pd
@@ -183,13 +182,13 @@ forecast_df = tfm.forecast_on_df(
 )
 ```
 
-## Finetuning
+## 微调
 
-We have provided an example of finetuning the model on a new dataset in `notebooks/finetuning.ipynb`.
+我们在中提供了一个在新数据集上微调模型的示例`notebooks/finetuning.ipynb`.
 
-## Contribution Style guide
+## 贡献风格指南
 
-If you would like to submit a PR please make sure that you use our formatting style. We use [yapf](https://github.com/google/yapf) for formatting with the following options,
+如果您想提交PR，请确保使用我们的格式样式。我们使用[yapf](https://github.com/google/yapf)对于使用以下选项进行格式化，
 
 ```
 [style]
@@ -200,4 +199,4 @@ spaces_before_comment = 2
 
 ```
 
-Please run `yapf --in-place --recursive <filename>` on all affected files.
+请运行`yapf --in-place --recursive <filename>`命令在所有受影响的文件.
